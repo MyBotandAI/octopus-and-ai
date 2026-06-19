@@ -1,18 +1,30 @@
 # Octopus
 
-**A methodology framework for orchestrating specialist AI agent sessions across solo-founder projects.**
+**A way of working with AI agents — so one person can build like a small, organised team.**
 
-Octopus turns "one human + AI coding agents" into a small, disciplined team. You — the Product Owner — coordinate a rotation of specialist agent sessions (Analyst, Architect, UX, DEV, QA, plus a one-shot mode) through a defined loop, with **durable documents instead of chat history** as the source of truth. It is model-agnostic in shape; Claude is the reference implementation.
+If you build with AI coding agents, you know the failure mode: one sprawling chat that drifts, forgets earlier decisions, and tangles "what are we building?" with "now write this code." Octopus fixes that by giving the work the same **structure a real team has**.
+
+Instead of one endless conversation, you run a handful of focused agent sessions, each with a clear job — one works out *what* to build, one designs it, one writes the code, one reviews it. You stay in charge and make the calls. And the project's memory lives in **documents, not chat history**, so nothing important is lost between sessions.
+
+It isn't software you install — it's a set of Markdown guides you drop into your project and follow. Model-agnostic in shape; Claude is the reference implementation.
 
 > Part of the **mybotandai** house — *My Octopus and AI*: you and your octopus of agents, working together.
 
-## What it is (and isn't)
+## How it works in practice
 
-Octopus is **prose and process**, not a tool you install. There is no runtime to run and no dependency to add — you copy a set of Markdown documents into your project and follow them. The value is in the discipline: clear roles, explicit handoffs, one decision at a time, and a paper trail that survives between sessions.
+You — the **Product Owner** — direct a small cast of specialist agent roles through a repeatable loop:
+
+- **Analyst** writes the spec (what to build, for whom, done-when).
+- **Architect** weighs in on big structural calls (only when needed).
+- **UX** designs the visual surface (only when there is one).
+- **DEV** implements it and writes the tests.
+- **QA** reviews the result against the spec before you ship.
+
+Each role hands off to the next with a written brief, not a memory of the chat. Decisions get recorded once, in one place. You approve the work at every gate. The result: the throughput of a team, run by one person, with a paper trail that survives.
 
 ## The three-layer model
 
-Octopus is structured in three layers that stay separate and are never merged:
+For the people who'll adopt it, Octopus is structured in three layers that stay separate and are never merged:
 
 - **Layer 1 — core (`methodology/`)** — *project-agnostic.* How the team works, how roles communicate, what documents look like, and the non-negotiable directives. Four files: `WAY_OF_WORKING.md`, `PO_INTERACTION_STYLE.md`, `DOCUMENT_TEMPLATES.md`, `DIRECTIVES.md`. Re-synced wholesale on upgrade; never customized per project.
 - **Layer 2 — roles & templates (`roles/`, `templates/`)** — *framework-shipped.* Six role briefs plus a library of document seeds (`*_SKELETON.md`) and init-prompt templates. Customization is **additive** — a new file alongside the defaults, never an edit to a shipped one.
