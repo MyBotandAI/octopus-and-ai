@@ -11,11 +11,11 @@ Read this file top to bottom and follow every step in order. Do not skip steps. 
 The flow runs in **six phases:**
 
 1. **Phase 1 — Discovery** — open Analyst-style conversation about the idea. No documents produced.
-2. **Phase 2 — Alignment** — lock the elevator pitch (Name / Problem / Solution / Target user / Success criterion) as inline text.
+2. **Phase 2 — Alignment** — lock the elevator pitch (Name / Problem / Solution / Target user / Success criterion / Intent) as inline text.
 3. **Phase 3 — Architect handoff (conditional)** — if PO confirms a structural question warrants Architect, produce an Architect init prompt and pause; resume after Architect returns.
 4. **Phase 4 — Draft & Validate** — generate a complete `PROJECT_GUIDE.md` draft inline from Phase 1+2 + sensible defaults; PO validates in one MCQ. Replaces the old 12-sub-section questionnaire.
 5. **Phase 5 — Features & Tasks elicitation** — Epics (opt-in), Features, Task names, Backlog items. The only Q&A in Kickoff that genuinely requires PO input.
-6. **Phase 6 — Artifact production** — batched writes of `PROJECT_GUIDE.md`, finalized `DECISIONS.md`, `ROADMAP.md`, `BACKLOG.md`, and the init prompt for the first Plan session (Feature 1).
+6. **Phase 6 — Artifact production** — batched writes of `PROJECT_GUIDE.md`, finalized `DECISIONS.md`, `ROADMAP.md`, `BACKLOG.md`, the `CANVAS.md` a commercial-intent project earns, and the init prompt for the first Plan session (Feature 1).
 
 **Write rule.** Artifact writes happen only in Phase 6, with two explicit exceptions: incremental `DECISIONS.md` rows during Phases 3, 4, and 5 per **D2**, and the Architect init prompt at the end of Phase 3 if Architect is needed. Phases 1, 2, 4, and 5 produce no other disk state.
 
@@ -54,8 +54,29 @@ Suggested entry points (use as inspiration, not a script):
 - What does success look like? Failure?
 - What constraints or assumptions does PO bring?
 - What's been tried before? What didn't work?
+- **Why is PO building this?** An exploration, a tool for PO's own use, something PO is steering for someone else, or something meant to earn — now or later. This is the **Intent** field locked in Phase 2; the answer decides whether the project earns a `CANVAS.md` (see § Intent and Market below).
+- **Who else already does this?** Competitors, incumbents, the thing people use today — including "a spreadsheet" or "nothing". This is the **Market** field recorded in `PROJECT_GUIDE.md § Identity`.
+- **How would it earn?** Only if Intent points at commercial or prospective. Who pays, for what. "No idea yet" is a real answer and gets recorded as one.
+
+The last three are conversation openings, not a form — ask them where they fit, follow the answers, and do not read them out in sequence. They exist because a project whose *why* is unwritten gets every later decision weighed against an unstated goal, and a market nobody looked at surfaces as a surprise weeks in.
 
 If project nature (new build / refactor / migration) surfaces, note it for grounding — it is not a separate structured question in Phase 4.
+
+### Intent and Market
+
+Two fields come out of this phase and both are durable.
+
+**Intent** is a closed choice, not prose — one of three:
+
+| Intent | Meaning | Earns a canvas |
+|---|---|---|
+| `personal` | A tool, an exploration, or a project PO steers for someone else. Nobody outside is meant to pay. A community or open-source project with no revenue intent files here. | No |
+| `prospective` | Built as an MVP with the prospect of becoming a business. Nobody pays yet. | Yes |
+| `commercial` | Someone is meant to pay for it now. | Yes |
+
+Pick the honest one, not the ambitious one — `personal` is a legitimate answer for a project PO cares about, and a project that later becomes `prospective` earns its canvas then (see Phase 6.5).
+
+**Market** is prose: who else already does this, and what people use today. One or two sentences. Record `Not looked at yet` when that is the truth — a blank reads as "no competitors", which is never the finding.
 
 **Phase 1 exit condition:** the session has gathered enough shared context to summarize the project's shape and propose the elevator pitch in Phase 2.
 
@@ -65,13 +86,18 @@ If project nature (new build / refactor / migration) surfaces, note it for groun
 
 **Still no artifacts written to disk.** The pitch's durable home is `PROJECT_GUIDE.md` § Identity, produced in Phase 6.
 
-Produce an elevator pitch as **inline text** with five fields:
+Produce an elevator pitch as **inline text** with six fields:
 
 - **Name** — short, evocative.
 - **Problem** — one sentence on what's broken or missing today.
 - **Solution** — one sentence on what this project provides.
 - **Target user** — who benefits.
 - **Success criterion** — how PO will know it worked.
+- **Intent** — `personal` / `prospective` / `commercial`, per Phase 1 § Intent and Market.
+
+Intent is in the pitch because it reframes every other field: the same Solution for the same Target user is a different project depending on whether anyone is meant to pay for it. Locking it here means the answer is stated and agreed rather than inferred later from the work.
+
+**Market is not a pitch field** — it is a recorded fact, not an alignment statement, and it lands in `PROJECT_GUIDE.md § Identity` at Phase 4. Carry Phase 1's answer forward; do not re-ask it here.
 
 Show the pitch to PO inline (in chat). PO confirms or refines. Iterate until PO locks the pitch.
 
@@ -114,7 +140,8 @@ Phase 4 produces a **complete draft of `PROJECT_GUIDE.md` inline (in chat, not c
 
 Produce a complete draft of `PROJECT_GUIDE.md` inline in chat. Source values from:
 
-- **Identity sub-fields (Name, Description, Problem, Solution, Target user, Success criterion)** ← Phase 2 pitch.
+- **Identity sub-fields (Name, Description, Problem, Solution, Target user, Success criterion, Intent)** ← Phase 2 pitch.
+- **Market** ← Phase 1's "who else already does this". `Not looked at yet` when that is the truth; never blank.
 - **Type** ← inferred from Phase 1 (multi-select from `Frontend / Backend / Mobile / Automation / Internal tool / Exploration / Other`).
 - **Surfaces** ← inferred from Phase 1.
 - **Tech stack** ← `TBD — <decision-slug>` for each surface unless Phase 1/3 already locked specifics. Include the **model-tier mapping** (deep-reasoning / fast-execution → concrete models) per `PROJECT_GUIDE_SKELETON.md § Tech stack`.
@@ -131,7 +158,7 @@ Produce a complete draft of `PROJECT_GUIDE.md` inline in chat. Source values fro
 - **Naming conventions** ← defaults: Task IDs `Uppercase descriptive tag`, branch scopes inferred from Surfaces, `B-xxx` / `I-xxx` standard.
 - **FRAMEWORK_VERSION** ← read current value from file.
 - **File index** ← lists only docs that exist or this Kickoff will produce.
-- **Documents earned later** ← list canonical docs not yet created with their trigger conditions.
+- **Documents earned later** ← list canonical docs not yet created with their trigger conditions. When Intent is `personal`, this list includes `CANVAS.md` with its trigger, so a later change of Intent has a row to fire against.
 - **Features & Tasks** ← `<deferred to Phase 5>` placeholder.
 
 Present the complete draft to PO inline.
@@ -224,7 +251,21 @@ Per `templates/ROADMAP_SKELETON.md` and the Project mode from Phase 4. Current R
 
 Copy from `templates/BACKLOG_SKELETON.md`. Populate with items from 5.4 under the appropriate tiers (per D14 estimation gate — new items default to `## Needs estimation` unless PO supplied an effort estimate inline). Keep empty-tier headers.
 
-### 6.5 — Write `docs/init_analyst_plan_<feature1-kebab>.md`
+### 6.5 — (Conditional) Write `CANVAS.md`
+
+**Only when Phase 2 locked Intent as `prospective` or `commercial`.** When Intent is `personal`, write nothing and make sure `PROJECT_GUIDE.md § Documents earned later` carries the `CANVAS.md` row instead — a project whose Intent changes later earns the canvas then, and the row is what fires.
+
+Copy from `templates/CANVAS_SKELETON.md` to `CANVAS.md` at repo root and fill what Phase 1 already surfaced — typically the Customer segment, Problem, Value proposition and Solution boxes, and whatever the "how would it earn" conversation produced for Revenue.
+
+Three rules for filling it:
+
+1. **Every box gets a state and a test, including the empty ones.** A box nobody has an answer for is `Untested` with a named test and a named owner — not a blank and not a placeholder. The empty boxes are the point of the document.
+2. **Almost everything is `Untested` at Kickoff**, and that is the correct reading of a project on day one. A box only reads `Validated` when the evidence is named and real.
+3. **Do not research to fill it.** The canvas records what PO knows now. Filling a box with a plausible guess dressed as a finding is worse than leaving it untested — it is a false `Validated` that no later session will re-examine.
+
+Add `CANVAS.md` to `PROJECT_GUIDE.md § File index` (Layer 3 table, Owner: Analyst) rather than to Documents earned later.
+
+### 6.6 — Write `docs/init_analyst_plan_<feature1-kebab>.md`
 
 Identify Feature 1: the first Feature in `ROADMAP.md` (under its Epic if Epics are used; at top level otherwise). Identify Feature 1's first Not Started Task. The Plan handoff lives at `docs/` root (not inside the first-Task folder) — it's a Feature-level handoff, not a Task artifact.
 
@@ -245,7 +286,7 @@ Produce `docs/init_analyst_plan_<feature1-kebab>.md` by copying `templates/INIT_
 - `goal`: "Plan Feature `<feature-1-name>` — collect context stubs for each Task in the Feature, then produce the first Task's init_analyst."
 - `deliverable`: "`docs/TASK_<id>/context.md` per Task in Feature `<feature-1-name>`, plus `docs/TASK_<first-id>/init_analyst.md` for the first Task."
 
-### 6.6 — (Conditional) Rewrite `FRAMEWORK_VERSION`
+### 6.7 — (Conditional) Rewrite `FRAMEWORK_VERSION`
 
 Only if PO requested a different value in Phase 4. Rewrite with the new value. Otherwise skip.
 
@@ -271,6 +312,8 @@ After all writes complete, tell PO:
 | PO bails during Phase 4 | Any `DECISIONS.md` rows locked so far remain; re-invoking restarts at Phase 1 since `PROJECT_GUIDE.md` does not yet exist (the partial `DECISIONS.md` is the only surviving state) |
 | PO bails during Phase 5 | Same as Phase 4 — no `PROJECT_GUIDE.md` yet; restart at Phase 1 |
 | PO bails during Phase 6 | Files produced up to the bail point remain; re-invoke detects `PROJECT_GUIDE.md` exists and redirects to `INIT_ANALYST_PLAN.md` for the rest |
+| PO won't pick an Intent | Do not guess and do not default to `commercial`. Ask once more in PO's own terms ("is anyone meant to pay for this, now or later?"); if PO genuinely doesn't know, lock `personal` and note it — the canvas is earned later, and a wrong `personal` costs one row, a wrong `commercial` costs a document nobody fills |
+| Intent is `personal` but PO wants a canvas | Write it. The earned condition is a floor, not a gate — a `personal` project whose owner wants the business lens is not a methodology violation |
 | Task ID collision | Halt the collection loop; prompt PO to pick a different ID |
 | Task ID with invalid characters | Prompt PO to normalize before continuing |
 

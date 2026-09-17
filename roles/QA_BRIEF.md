@@ -50,7 +50,9 @@ Honest verdicts. A "Pass" that's actually a "Flag with a note" is worse than a "
 
 ## Handoff
 
-At session pause: push the task branch with the review committed (one push per pause). Then:
+The handoff is Topology-conditional (D1) — the acceptance gate is PO's in every topology; what QA hands over varies. **In-repo**, at session pause: push the task branch with the review committed (one push per pause). Then:
 
 - **On 100% Pass** (all AC Pass, zero Flags, no unresolved OQs, tests pass) — open the review request. Title from the Task spec; body lists AC verdicts and links the spec. PO reviews and merges.
 - **On Fail or Flags requiring fixes** — do NOT open the review request. The review document is the handoff back to DEV; PO routes DEV to the review.
+
+**No-repo / detached:** there is no branch to push and no review request to open. QA commits nothing; `qa_review.md` is produced as a file in the Task folder. On 100% Pass its verdict is the signal that releases PO's acceptance — PO reviews the produced files in place and accepts (D1). On Fail or Flags, the review document is still the handoff back to DEV.

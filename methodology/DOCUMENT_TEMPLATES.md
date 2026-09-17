@@ -101,11 +101,13 @@ The canonical anchor target for cross-doc references (per Inter-doc boundaries).
 
 **Canonical shape:** index table with kebab-case slugs + ≤150-char Summary + Locked date; body sections per slug for longer Value and Rationale.
 
+**State (D2).** A row is `Locked` unless it is `Provisional` — bound now, with a **`Revisit when:`** line in its body naming the specific thing that re-opens it. A provisional row binds exactly as a locked one does; the trigger records *when* it gets re-examined, it does not soften what it decides. A row contradicted by later evidence carries a **`Challenged:`** line — date, one line, and a pointer to the document holding the evidence — and its State reads `Locked — challenged`. Both marks live on the row itself so a reader of `DECISIONS.md` sees a contested or time-boxed decision without having found the other document first. The optional **`State`** column is added to the index the first time a project writes such a row; while every row is a plain lock, the column is omitted.
+
 `## Superseded Decisions` section at the bottom holds retired rows; old bodies stay in place with `Superseded by:` pointers; new bodies carry `Supersedes:` pointers.
 
 Multi-component projects may add an optional `Surface` column to the index.
 
-Analyst, Architect, or any agent that surfaces a decision per D2 writes the row after PO confirms via OQ. Decisions are immutable once written.
+Analyst, Architect, or any agent that surfaces a decision per D2 writes the row after PO confirms via OQ. **The record is immutable — never edited, never deleted — while whether a decision is still right stays askable.** An agent holding evidence against a row raises the supersession OQ rather than filing the contradiction elsewhere (D2).
 
 ### `AGENTS.md` / `AGENTS_<component>.md` — Live technical context (NOW)
 
@@ -188,6 +190,18 @@ Earned when launch is in sight. Lists everything that must be true before public
 
 PO maintains.
 
+### `CANVAS.md` — Business hypotheses (earned; commercial intent only)
+
+The **business** lens, distinct from every other canonical doc: nine boxes — customer segment, problem, value proposition, solution, channels, revenue, costs, key metric, unfair advantage — each written as a **hypothesis with a state**. It is not a business plan and not a strategy document; it is the map of what is known, what is merely believed, and what nobody has tested.
+
+**Earned, never mandatory.** A project earns `CANVAS.md` when `PROJECT_GUIDE.md § Identity` records **Intent** as `prospective` or `commercial` — including when Intent later changes to one of them. A `personal` project never gets one; the row sits in § Documents earned later until Intent moves. The test is mechanical: read one field, apply it. No judgment call, no PO in the room.
+
+**Shape:** index table (box, state, how it's tested) + one body section per box, per D10. Three states only — **validated** (tested and passed, evidence named), **untested** (a reasonable belief nothing has confronted, test named), **invalidated** (tested and failed; never deleted). A box nobody has answered, a number nobody measured, and a choice nobody made are all *untested* — what distinguishes them is the **How it's tested** cell, not a fourth state.
+
+**Boundary with `DECISIONS.md` (D12).** The canvas holds *hypotheses about the business* — who pays, how much, why, what is unproven. `DECISIONS.md` holds *locked product choices and their rationale*. A canvas box cites decision slugs; it never restates their rationale. When a hypothesis becomes a locked choice, the decision row is where it lands.
+
+Analyst writes; PO answers. Skeleton: `templates/CANVAS_SKELETON.md`.
+
 ### `COLLAB_CONTEXT.md` — Collaboration framing (Detached topology only)
 
 Present only for **Detached-topology** projects (Octopus in a personal folder; the subject is a different team's repo). Names the subject project, external team's methodology, PO's role, comms channel, access level, `inbox/` location, log of outputs handed back.
@@ -235,6 +249,15 @@ The TASK spec is the single most important per-Task artifact. Analyst produces i
 Active Tasks live in per-Task folders at `docs/TASK_<id>/`. Inside the folder, artifacts use short, role-keyed filenames: `context.md` (planning stub), `spec.md` (the Analyst deliverable), `init_<role>.md` (per role handoff), `qa_review.md`, `design.md` (when UX produces one).
 
 Shipped Task folders move to `docs/archive/` after Task ships. Read-only history.
+
+### The Task folder is process; the deliverable is product
+
+Everything in `docs/TASK_<id>/` — `context.md`, `spec.md`, `design.md`, the init prompts, `qa_review.md` — is the **record of how the Task was produced**, and it **archives** with the Task. The Task's **deliverable — the product itself — lives in the project's persistent output location, never in the Task folder**:
+
+- **Code projects** — the deliverable is code (with its tests, config, assets) in the repo's own source tree; the `spec.md` in the Task folder is the *process record*, the code is the *product*. Already the norm — stated here for completeness.
+- **Document / content projects** (a workshop, a report set, a knowledge base — projects with no source tree) — the deliverable is a document, and it lives in a top-level **`deliverables/`** folder (persistent, not archived). The Task folder holds only the process trail: the context stub's Goal is the plan, and the produced document is the product. A docs Task's Analyst writes the deliverable to **`deliverables/`**, not a `spec.md` that would archive out of sight.
+
+One rule across every project shape: **process archives, product persists** (per [`DECISIONS.md` deliverable-output-location]). Where a driven loop produces the deliverable, it writes it to the output location, not the Task folder.
 
 ### Section structure
 
@@ -480,6 +503,7 @@ Add the rest as the project earns them — record the planned additions in `PROJ
 - `CONTRIBUTING.md` — when more than one branch type exists.
 - `PRELAUNCH_CHECKLIST.md` — when launch is in sight.
 - `PARITY_LOG.md` — when ≥2 surfaces ship in parallel with potential divergence.
+- `CANVAS.md` — when `PROJECT_GUIDE.md § Identity` records Intent as `prospective` or `commercial`, including a later change to one of them.
 
 Pre-creating empty documents is a smell — they pretend the project has structure it hasn't earned, and invite filler content.
 

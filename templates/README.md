@@ -27,6 +27,7 @@ Layer 2 templates and procedural docs for Octopus framework consumers. **Framewo
 | `OPS_SKELETON.md` | Document seed | Ops starter |
 | `CONTRIBUTING_SKELETON.md` | Document seed | Contributing guide starter |
 | `AGENTS_SKELETON.md` | Document seed | Technical context starter |
+| `CANVAS_SKELETON.md` | Document seed (earned) | Business-hypothesis canvas — nine boxes, one state each; earned when Identity Intent is `prospective` or `commercial` |
 | `CONTEXT_STUB_SKELETON.md` | Document seed | Per-Task context stub — 6-field format, produced by Plan |
 | `COLLAB_CONTEXT_SKELETON.md` | Document seed (Detached only) | Collaboration framing for Detached-topology projects |
 

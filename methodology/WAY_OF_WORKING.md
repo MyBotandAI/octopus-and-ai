@@ -263,16 +263,18 @@ The loop is a graph. PO routes work through it. The common path is shown below; 
   Analyst → (needs UX? yes) → UX init prompt → UX → Analyst reopen → DEV init prompt → DEV
 
 [Build phase — once per Task]
-  DEV (persistent) ⇄ QA (persistent) → PO accepts → PO merges
+  DEV (persistent) ⇄ QA (persistent) → PO accepts → PO merges (in-repo)
          ↑                  ↑
          └── PO testing ────┘
 
 [Closure phase — once per Task]
-  PO syncs local default branch → Analyst reopens
+  PO syncs local default branch (in-repo) → Analyst reopens
   Analyst closure: ROADMAP / BACKLOG / archive
   Next-step routing
   PO closes sessions
 ```
+
+**The terminal control is PO's acceptance gate** — *PO reviews the work and accepts it.* What acceptance mechanically *does* is Topology-conditional (D1): **in-repo**, QA opens the review request on 100% Pass and PO's acceptance **merges** it; **no-repo**, there is no branch or review request, so PO reviews the produced files in place and acceptance **marks the Task accepted**; **detached** follows the no-repo shape on the Octopus side. The role loop is invariant across all three — DEV implements, QA reviews against AC, PO accepts. Merge is git's implementation of the gate, never the gate itself.
 
 Each role produces the init prompt for the next role in the common path. PO performs the mechanical action of opening the next session — until programmatic orchestration replaces the manual step.
 
@@ -290,19 +292,20 @@ Each role produces the init prompt for the next role in the common path. PO perf
 - **Skip the Phase 3 Architect handoff** when no structural question is open.
 - **Skip Architect** at Task level for any Task that fits within existing structural decisions.
 - **Skip Analyst** only for bug fixes where the spec is the bug report itself.
-- **Skip DEV** for doc-only Tasks with no code surface (methodology-as-product projects, README / spec / doc edits): Analyst produces the doc changes as session output; QA or PO live-review gates.
+- **Skip DEV** for doc-only Tasks with no code surface (methodology-as-product projects, README / spec / doc edits): Analyst produces the doc changes as session output (a document deliverable lands in the project's `deliverables/` output location, not the process-only Task folder — see `DOCUMENT_TEMPLATES.md § The Task folder is process; the deliverable is product`); QA or PO live-review gates.
 - **Skip QA** only for documentation changes PO is reviewing in real time.
 - **Skip the whole loop** for One-shot Scale (or per-Task `mode: one-shot` opt-out within an Octopus project) — a single creative deliverable (marketing copy, a landing page, a README rewrite, or content-fill of an already-built page-set). The agent makes design + copy + implementation calls in a single session; PO reviews the output. A multi-page presentational *build* is **not** a one-shot — it runs through the loop as a single batched Task (see § Multi-page presentational builds). See `DOCUMENT_TEMPLATES.md § One-shot variant` and `templates/ONESHOT.md`.
 
-### Task closure (post-merge)
+### Task closure (post-acceptance)
 
-After PO merges the Task's branch, Analyst reopens briefly for **Task closure** — the bookkeeping that connects a shipped Task back to the project's planning artifacts.
+After PO accepts the Task, Analyst reopens briefly for **Task closure** — the bookkeeping that connects a shipped Task back to the project's planning artifacts. What acceptance *was* is Topology-conditional (D1): **in-repo**, PO merged the Task's branch; **no-repo / detached**, PO accepted the produced files in place.
 
-**Analyst's first action at closure:** sync local state (checkout default branch + pull), then delete the merged local task branch (`git branch -d <task-branch>` — fails safely if it isn't fully merged).
+**Analyst's first action at closure** is Topology-conditional (D1):
 
-Halt and surface to PO if the working tree is dirty.
+- **In-repo** — sync local state (checkout default branch + pull), then delete the merged local task branch (`git branch -d <task-branch>` — fails safely if it isn't fully merged). Halt and surface to PO if the working tree is dirty.
+- **No-repo / detached** — no branch to sync or delete; closure is file operations only. Halt and surface to PO if the produced files are in an unexpected state.
 
-Analyst's closure responsibilities (after sync):
+Analyst's closure responsibilities (after the first action):
 
 1. **`ROADMAP.md`** — Task status → Done with ship date; promote to Past section when appropriate.
 2. **`BACKLOG.md`** — retire items the Task resolved; update notes; surface any new items.
@@ -310,8 +313,30 @@ Analyst's closure responsibilities (after sync):
 4. **Archive-path sweep** — grep live docs for the old path and bump references.
 5. **Promote earned files in `PROJECT_GUIDE.md` § File index** — scan for files that now exist but are still under "Documents earned later."
 6. **Surface post-merge checklist** — read `docs/archive/TASK_<id>/qa_review.md` § Post-merge checklist when present and surface verbatim to PO.
-7. **Release boundary (when warranted)** — when this Task closure marks a release boundary, write the new release entry to `CHANGELOG.md` (summary of shipped Task(s) since the previous tag; cross-refs `DECISIONS.md` slugs and `B-xxx` IDs per D12; no rationale) and surface a one-line tag suggestion. PO commits the CHANGELOG addition and executes the tag.
-8. **Next-step routing** — examine the Feature this Task belonged to and either produce the next Task's init_analyst or surface "open Plan for Feature N+1."
+7. **Direction re-ask (when warranted)** — see § The direction re-ask below. Runs at a closure that completes a Feature, at a closure where the project's recorded Intent has changed, or whenever PO asks — not on an ordinary Task closure.
+8. **Release boundary (when warranted)** — when this Task closure marks a release boundary, write the new release entry to `CHANGELOG.md` (summary of shipped Task(s) since the previous tag; cross-refs `DECISIONS.md` slugs and `B-xxx` IDs per D12; no rationale) and surface a one-line tag suggestion. PO commits the CHANGELOG addition and executes the tag.
+9. **Next-step routing** — examine the Feature this Task belonged to and either produce the next Task's init_analyst or surface "open Plan for Feature N+1."
+
+#### The direction re-ask
+
+The loop keeps every session inside the decision envelope by design. This is the one beat that asks whether the envelope is still right — and it is a **step in the existing Analyst closure**, not a new role, a new loop, or a retrospective ceremony.
+
+**When it runs.** A closure that **completes a Feature**; a closure where the project's recorded **Intent** (`PROJECT_GUIDE.md § Identity`) has changed since the last one; or **whenever PO asks for it**. An ordinary mid-Feature Task closure skips it — a check that fires with nothing to report on every Task is a check nobody reads.
+
+**What it reads,** before any release entry is written:
+
+- **`CANVAS.md`**, when the project has one — which hypotheses the shipped work moved, and which boxes are still `untested` with a named test nobody has run.
+- **Every `DECISIONS.md` row whose State is `Provisional`** — has its `Revisit when:` trigger fired, or plausibly fired?
+- **Every row carrying an unresolved `Challenged:` line** — the contradiction is still standing.
+- **The locked design system**, when the project has one — is the look still the right one, or has a single design pass become permanent by never being mentioned again? A project that has never run a net-new design pass has nothing to read here.
+
+**What it produces.** A short list surfaced to PO — each item naming the row or box, what changed, and the question it raises. **Surface, do not re-decide** (D3). A re-ask with nothing to report says so in one line.
+
+**Where the answers go — two routes, and the beat is not finished until every answer has taken one.** An answer that **changes a decision** is written per D2: a supersession, a superseding provisional row carrying a trigger, or the row left standing with its challenge recorded. An answer that **asks for something to be done** — a named test PO wants run, a box worth working — becomes a **`BACKLOG.md` item written during the re-ask** (not handed back to the closure's earlier backlog step), or a Task when PO wants it now; an item that is not engineering work has no DEV estimate to wait for and takes D14's self-estimate exception. And *"noted, not now"* is an outcome too — it is recorded on the item it concerns, so the next re-ask reads a deliberate deferral instead of raising the same finding again.
+
+Without the second route the beat can only ever notice. A box carrying a named test nobody has run would be reported at every boundary, agreed with every time, and never become work — an agenda with no meeting.
+
+**When a test is run, the box it settles is updated** — its state, the evidence, and what the test showed. A box the test *invalidated* is never deleted; it is the most expensive knowledge in the document. A test that ran without settling anything leaves the box `untested` and rewrites what would settle it.
 
 #### Spec-less chore variant
 

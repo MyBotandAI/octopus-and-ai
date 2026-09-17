@@ -155,16 +155,18 @@ If PO names a new Feature, collect: name + kebab-slug + one-paragraph scope, and
 
 ### Step 2 — Identify the Feature's Tasks
 
-Read `ROADMAP.md`'s Task list for this Feature.
+Read `ROADMAP.md`'s Task list for this Feature. For each Task, check whether `docs/TASK_<id>/context.md` already exists — a Task with a stub is **already planned**; a Task with none is **not planned yet**. This check is what makes re-invoking Plan on a Feature that already has Tasks in `ROADMAP.md` but no `docs/` at all (a half-planned project) recover cleanly rather than re-eliciting or overwriting anything already on disk.
 
 > Feature `<name>` currently has these Tasks in `ROADMAP.md`:
-> 1. `<task-1-name>` (`<id-1>`)
-> 2. `<task-2-name>` (`<id-2>`)
+> 1. `<task-1-name>` (`<id-1>`) — already planned
+> 2. `<task-2-name>` (`<id-2>`) — not planned yet
 >
-> (a) Plan these Tasks as-is
+> (a) Plan the not-planned Tasks — Tasks that already have a context stub are left untouched
 > (b) Add / remove / rename Tasks first
 
-If (b): collect changes; update `ROADMAP.md`.
+If (b): collect changes; update `ROADMAP.md`; re-check stub presence for the edited list before continuing.
+
+**If every Task already has a `context.md`,** tell PO: "Every Task in `<name>` is already planned — nothing to write here. Open Run to continue the loop." and stop; do not run Steps 3–5.
 
 **Soft Feature size limit:** if the Feature has more than 5 Tasks after editing, surface a warning:
 
@@ -174,33 +176,49 @@ If (b): collect changes; update `ROADMAP.md`.
 
 If (b), help PO re-partition; update `ROADMAP.md`; re-confirm the Task list before continuing.
 
-### Step 3 — Collect context stubs
+### Step 3 — Draft & Validate context stubs (replaces the old field-by-field questionnaire)
 
-For each Task in the Feature, walk PO through the six fields per `templates/CONTEXT_STUB_SKELETON.md`. Ask one field at a time. Hold answers in chat — don't write `context.md` files until Step 4.
+For the **not-planned** Tasks identified in Step 2 only — a Task that already has a `context.md` is skipped entirely here, never re-drafted — **draft each Task's six-field context stub** from what you already have (the Feature and Task names, `PROJECT_GUIDE.md`, `DECISIONS.md`, and any prior shipped specs the Tasks depend on), rather than interrogating PO field by field. Hold the drafts in chat — don't write `context.md` files until Step 4.
 
-> **Context stub for `<task-id>` — `<task-name>`**
+Draft all six fields per `templates/CONTEXT_STUB_SKELETON.md`, **proposing** sensible values PO can correct:
 
-1. **Goal** — one sentence stating this Task's outcome.
-2. **Rough scope** — `In:` / `Out:` bullets, 2–4 total, one at a time, stop when PO signals done.
-3. **Dependencies** — other Task IDs or external prerequisites, or `none`.
-4. **Roles needed** — Architect / UX / QA checklist (Analyst + DEV mandatory by methodology):
-   > (a) Architect — yes / no
-   > (b) UX — yes / no
-   > (c) QA — yes / no (recommended for user-facing)
-5. **Effort estimate** — S (1–2 days) / M (2–4) / L (4–5+).
+1. **Goal** — one sentence stating the Task's outcome, synthesised from its name + the Feature's scope.
+2. **Rough scope** — `In:` / `Out:` bullets (2–4 total) inferred from the Task's role in the Feature.
+3. **Dependencies** — other Task IDs (infer from execution order / names) or external prerequisites, or `none`.
+4. **Roles needed** — Analyst + DEV are mandatory; **propose** UX (if the Task has a visual surface), QA (recommended for anything user-facing), and Architect (if it carries a structural decision).
+5. **Effort estimate** — a **proposed** S (1–2 days) / M (2–4) / L (4–5+); PO (or DEV at the estimation gate, D14) corrects it.
 6. **Open considerations** — bullets or `none`.
+
+Present **all** drafted stubs together and ask PO to validate — the same Draft → Validate shape as S2:
+
+> **Draft context stubs ready** — `<N>` stubs above (`<task-1-name>`, `<task-2-name>`, …). Proposed roles, dependencies, and effort per Task are my inference from the Feature — correct anything I got wrong.
+>
+> (a) Looks good — proceed to write them.
+> (b) Refine specific stubs or fields — name which.
+
+**If (a):** proceed to Step 4.
+
+**If (b):** PO names which stubs/fields need adjustment; iterate on those only. Cross-cutting choices surfaced during refinement write to `DECISIONS.md` per D2. Re-present the updated drafts; offer (a) / (b) again.
+
+A field you genuinely can't infer (a dependency only PO knows) is drafted as a best guess or `TBD` — the validate step is where PO fills it, exactly as S1 marks un-surfaced pitch fields `TBD`.
 
 ### Step 4 — Write context stubs
 
-For each Task in the Feature, write `docs/TASK_<id>/context.md` from `templates/CONTEXT_STUB_SKELETON.md`. Fill from Step 3 answers. Header includes Task name, Task ID, parent Feature (or `standalone`).
+For each Task drafted in Step 3 (the not-planned ones only), write `docs/TASK_<id>/context.md` from `templates/CONTEXT_STUB_SKELETON.md`. Fill from the Step 3 drafts as validated by PO. Header includes Task name, Task ID, parent Feature (or `standalone`).
 
-Write one file per Task before moving to the next.
+Write one file per Task before moving to the next. **Never overwrite a Task's existing `context.md`** — Step 2/3 already excluded any Task that has one, so this step only ever creates new files. This is what makes recovery idempotent: re-running Plan on the same Feature after every Task is planned writes nothing and changes nothing on disk.
 
 ### Step 5 — Write the first Task's `init_analyst.md`
 
-Identify Feature's first Not Started Task (the first one in ROADMAP order with status `Not Started`).
+**Identify the target Task from the Tasks *this session* just planned in Step 4 (its stub-write batch) — never from ROADMAP status text.** ROADMAP `Status` cells are not kept in sync with planned/not-planned state (that's `context.md` presence, Step 2's concept), so "the first ROADMAP row reading `Not Started`" can silently be a *different*, already-planned Task in a recovery session — picking it would hand `init_analyst.md` to the wrong Task and leave the Task this session actually recovered with no handoff at all, permanently (re-running Plan later finds every Task planned and stops at Step 2, so this never self-heals).
 
-Read `docs/TASK_<first-id>/context.md` (just written in Step 4).
+Search Step 4's write batch, in ROADMAP order, for the first Task whose `docs/TASK_<id>/init_analyst.md` does not yet exist — call it `<first-id>`.
+
+- **If Step 4's batch is empty** (Step 2 already found every Task planned and stopped before Step 3), there is nothing to hand off — skip this step entirely.
+- **If every Task in the batch already has an `init_analyst.md`** (unexpected — a newly-stubbed Task normally has no handoff yet), skip this step; nothing to write.
+- **Otherwise, if `docs/TASK_<first-id>/init_analyst.md` already exists** for the resolved Task, leave it untouched and skip this step — that Task was already handed to Analyst.
+
+Read `docs/TASK_<first-id>/context.md` (written in Step 4).
 
 Produce `docs/TASK_<first-id>/init_analyst.md` by copying `templates/INIT_ANALYST_SKELETON.md`. Fill frontmatter:
 
@@ -222,7 +240,7 @@ Produce `docs/TASK_<first-id>/init_analyst.md` by copying `templates/INIT_ANALYS
 
 After all writes complete, tell PO:
 
-> Plan for Feature `<name>` complete. `<N>` context stubs written; `init_analyst.md` produced for the first Task (`<first-task-name>`, `<first-id>`). Commit, then open a fresh Analyst session for Task 1 using `docs/TASK_<first-id>/init_analyst.md`.
+> Plan for Feature `<name>` complete. `<N>` context stubs written`<, M already planned and left untouched>` (omit the `M` clause when it's zero); `init_analyst.md` produced for the first Task (`<first-task-name>`, `<first-id>`)`< — already existed, left untouched>` (use the second form when Step 5 was skipped). Commit, then open a fresh Analyst session for Task 1 using `docs/TASK_<first-id>/init_analyst.md`.
 >
 > Paused — Plan complete.
 
@@ -238,8 +256,12 @@ After all writes complete, tell PO:
 | Task ID collision when editing Tasks in Step 2 | Halt the edit loop; prompt for unique ID |
 | PO bails during S1/S2 (small-project setup) | No files written; re-invoking restarts at S0 |
 | PO bails during Step 3 | No `context.md` files written; re-invoking restarts at Step 1 for this Feature |
-| PO bails during Step 4 | Partial `context.md` files on disk; re-invoke; Step 4 walks remaining Tasks and skips already-written ones (confirm with PO before overwriting any existing file) |
-| Existing `context.md` would be overwritten | Pause; show proposed change; ask PO to confirm before writing |
+| PO bails during Step 4 | Partial `context.md` files on disk for this session's not-planned batch; re-invoking re-runs Step 2, which finds the still-unstubbed Tasks and re-offers only those in Step 3 — nothing already written is touched |
+| A Task already has a `context.md` that Step 2's check didn't expect (concurrent edit/race) | Pause; show the proposed change; ask PO to confirm before writing — never silently overwrite |
+| **Recovery — Feature's ROADMAP Tasks exist but `docs/` never existed** (the half-planned-project shape) | Step 2 finds every Task not-planned; Step 3 walks all of them; Step 4 writes every stub; Step 5 writes the first Task's `init_analyst.md` from that same batch — identical to planning a brand-new Feature, no special-casing needed |
+| **Recovery — some Tasks already planned, others not** (a genuine mid-planning state, not the ROADMAP's `Status` text) | Step 2 finds and skips the already-planned Tasks; Step 3/4 walk and stub only the not-planned ones; **Step 5 targets the first Task in *that* batch**, never "the first ROADMAP row reading `Not Started`" — an already-planned Task's stale ROADMAP status must never steal the handoff meant for the Task this session actually recovered (B-026) |
+| Every Task in the Feature already has a `context.md` (re-invoking an already-planned Feature) | Step 2 reports nothing to do; Steps 3–5 do not run; no files are read or written — idempotent no-op |
+| A Task was planned in an earlier session but still has no `init_analyst.md` (that session ended before its own Step 5, or wrote it for a different Task), and this session's Step 2 finds no not-planned Tasks left to recover | Step 4's batch is empty this session (nothing new to stub), so Step 5 has no batch to search and skips — this stale Task's missing handoff is **not** self-healed by re-invoking Plan. Surface it to PO as an Open Question rather than silently leaving it stuck; `docs/TASK_<id>/init_analyst.md` can be produced directly from the existing `context.md` as a one-off if PO confirms |
 
 ---
 

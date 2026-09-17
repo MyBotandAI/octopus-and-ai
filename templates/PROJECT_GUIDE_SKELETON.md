@@ -17,8 +17,14 @@ The canonical Identity table is required for every project. Complex multi-surfac
 - **Solution:** `<one sentence on what this project provides — distinct from Description; the offering>`
 - **Target user:** `<who benefits>`
 - **Success criterion:** `<how PO will know it worked>`
+- **Intent:** `<personal | prospective | commercial>`
+- **Market:** `<who else already does this, and what people use today — one or two sentences. "Not looked at yet" when that is the truth; never blank.>`
 - **Type:** `<comma-separated from: Frontend, Backend, Mobile, Automation, Internal tool, Exploration, Other>`
 - **Collaboration:** `<see COLLAB_CONTEXT.md — present only when this project's Topology is Detached; omit this line otherwise>`
+
+**Intent** answers *why this is being built*, and it is a closed choice because the framework reads it: `personal` (a tool, an exploration, or a project PO steers for someone else — nobody outside is meant to pay; a community or open-source project with no revenue intent files here), `prospective` (built as an MVP with the prospect of becoming a business), `commercial` (someone is meant to pay for it now). `prospective` and `commercial` earn `CANVAS.md`. Intent is expected to move — a project that starts `personal` and becomes `prospective` updates this line and earns its canvas then.
+
+**Market** is the counterpart fact and stays prose. It goes stale by nature; a stale answer that says when it was looked at beats a blank that reads as "no competitors."
 
 ---
 
@@ -142,7 +148,10 @@ Canonical docs not yet created. Each will be added to the Layer 3 file index abo
 | `CHANGELOG.md` | When the first release ships |
 | `CONTRIBUTING.md` | When more than one branch type exists or scopes need defining |
 | `PRELAUNCH_CHECKLIST.md` | When launch is in sight |
+| `CANVAS.md` | When `§ Identity` records Intent as `prospective` or `commercial` — including when Intent later changes to one of them |
 | `<additional>` | `<condition>` |
+
+The `CANVAS.md` row stays in this table for as long as Intent is `personal`, so a later change of Intent has something to fire against. Move it to the Layer 3 file index above when the canvas is written.
 
 Pre-creating empty documents is a smell — they pretend structure that hasn't been earned. Wait until there's content to put in.
 
